@@ -28,7 +28,7 @@ async def async_setup_entry(
 
 
 class TuyaLanFan(TuyaLanEntity, FanEntity):
-    def __init__(self, coordinator, description, entry_title) -> None:  # noqa: ANN001
+    def __init__(self, coordinator, description, entry_title) -> None:
         super().__init__(coordinator, description, entry_title)
         opts = self.options
         self._speed_range = (1, int(opts.get("speed_count", 3)))
@@ -36,9 +36,7 @@ class TuyaLanFan(TuyaLanEntity, FanEntity):
         if self._dp("percentage"):
             self._attr_supported_features |= FanEntityFeature.SET_SPEED
         if hasattr(FanEntityFeature, "TURN_ON"):
-            self._attr_supported_features |= (
-                FanEntityFeature.TURN_ON | FanEntityFeature.TURN_OFF
-            )
+            self._attr_supported_features |= FanEntityFeature.TURN_ON | FanEntityFeature.TURN_OFF
 
     @property
     def is_on(self) -> bool | None:

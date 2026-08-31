@@ -46,4 +46,4 @@ def scale_to_device(value: float, options: dict[str, Any]) -> int | float:
     scale = options.get("scale", 1) or 1
     offset = options.get("offset", 0) or 0
     raw = (value - offset) * scale
-    return int(round(raw)) if options.get("integer", True) else raw
+    return round(raw) if options.get("integer", True) else raw

@@ -46,7 +46,8 @@ async def _set(args: argparse.Namespace) -> None:
     dev = TuyaDevice(args.device_id, args.ip, args.local_key, args.version)
     try:
         await dev.connect()
-        print(json.dumps(await dev.set_dp(args.dp, _coerce(args.value)), indent=2, ensure_ascii=False))
+        result = await dev.set_dp(args.dp, _coerce(args.value))
+        print(json.dumps(result, indent=2, ensure_ascii=False))
     finally:
         await dev.close()
 
@@ -81,7 +82,9 @@ def _extract_keys(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     sub = p.add_subparsers(dest="cmd", required=True)
 
     d = sub.add_parser("discover")

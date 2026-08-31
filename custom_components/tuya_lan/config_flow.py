@@ -61,18 +61,14 @@ class TuyaLanConfigFlow(ConfigFlow, domain=DOMAIN):
         self._detected_dps: set[str] = set()
 
     # -- step: choose a device ------------------------------------------------
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         discovery: TuyaDiscovery | None = self.hass.data.get(DOMAIN, {}).get("discovery")
         if discovery is None:
             discovery = TuyaDiscovery()
             self.hass.data.setdefault(DOMAIN, {})["discovery"] = discovery
         self._discovered = await discovery.async_scan(timeout=6.0)
 
-        configured = {
-            entry.data.get(CONF_DEVICE_ID) for entry in self._async_current_entries()
-        }
+        configured = {entry.data.get(CONF_DEVICE_ID) for entry in self._async_current_entries()}
         choices = {
             dev_id: f"{dev.address}  ·  {dev_id[:8]}…  ·  v{dev.version}"
             for dev_id, dev in sorted(self._discovered.items())
@@ -103,9 +99,7 @@ class TuyaLanConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     # -- step: manual entry -------------------------------------------------
-    async def async_step_manual(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
             self._data.update(
                 {
@@ -153,9 +147,7 @@ class TuyaLanConfigFlow(ConfigFlow, domain=DOMAIN):
 
         schema = vol.Schema(
             {
-                vol.Required(
-                    CONF_LOCAL_KEY, default=self._data.get(CONF_LOCAL_KEY, "")
-                ): str,
+                vol.Required(CONF_LOCAL_KEY, default=self._data.get(CONF_LOCAL_KEY, "")): str,
                 vol.Required(
                     CONF_PROTOCOL_VERSION,
                     default=self._data.get(CONF_PROTOCOL_VERSION, DEFAULT_VERSION),
@@ -202,9 +194,7 @@ class TuyaLanConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.hass.async_add_executor_job(
                     _persist_profile, self.hass.config.path(DOMAIN, "profiles"), built
                 )
-                self.hass.data.setdefault(DOMAIN, {}).setdefault("profiles", {})[
-                    built.id
-                ] = built
+                self.hass.data.setdefault(DOMAIN, {}).setdefault("profiles", {})[built.id] = built
                 choice_id = built.id
             else:
                 choice_id = choice
@@ -227,7 +217,7 @@ class TuyaLanConfigFlow(ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(entry: ConfigEntry) -> "TuyaLanOptionsFlow":
+    def async_get_options_flow(entry: ConfigEntry) -> TuyaLanOptionsFlow:
         return TuyaLanOptionsFlow(entry)
 
 
@@ -235,9 +225,7 @@ class TuyaLanOptionsFlow(OptionsFlow):
     def __init__(self, entry: ConfigEntry) -> None:
         self.entry = entry
 
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
@@ -248,16 +236,14 @@ class TuyaLanOptionsFlow(OptionsFlow):
 
         schema = vol.Schema(
             {
-                vol.Required(
-                    CONF_LOCAL_KEY, default=current.get(CONF_LOCAL_KEY, "")
-                ): str,
+                vol.Required(CONF_LOCAL_KEY, default=current.get(CONF_LOCAL_KEY, "")): str,
                 vol.Required(
                     CONF_PROTOCOL_VERSION,
                     default=current.get(CONF_PROTOCOL_VERSION, DEFAULT_VERSION),
                 ): _version_selector(),
-                vol.Required(
-                    CONF_PROFILE, default=current.get(CONF_PROFILE, PROFILE_RAW)
-                ): vol.In(options),
+                vol.Required(CONF_PROFILE, default=current.get(CONF_PROFILE, PROFILE_RAW)): vol.In(
+                    options
+                ),
                 vol.Required(
                     CONF_POLL_INTERVAL,
                     default=current.get(CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL),

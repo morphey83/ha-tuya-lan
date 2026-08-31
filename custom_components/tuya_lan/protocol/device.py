@@ -27,7 +27,7 @@ from .version import ProtocolVersion
 
 _LOGGER = logging.getLogger(__name__)
 
-TuyaDeviceListener = Callable[[dict[str, Any]], None | Awaitable[None]]
+TuyaDeviceListener = Callable[[dict[str, Any]], Awaitable[None] | None]
 
 DEFAULT_TIMEOUT = 6.0
 _RESPONSE_CMDS = {
@@ -41,7 +41,7 @@ _RESPONSE_CMDS = {
 
 
 class _Pending:
-    __slots__ = ("cmd", "accept", "future")
+    __slots__ = ("accept", "cmd", "future")
 
     def __init__(self, cmd: int) -> None:
         self.cmd = cmd
@@ -91,6 +91,7 @@ class TuyaDevice:
         self._send_lock = asyncio.Lock()
         self._conn_lock = asyncio.Lock()
         self._raw_waiter: tuple[int, asyncio.Future[M.TuyaMessage]] | None = None
+        self._bg_tasks: set[asyncio.Task[Any]] = set()
         self._closing = False
 
     # -- lifecycle ---------------------------------------------------------------
@@ -113,7 +114,7 @@ class TuyaDevice:
                 self._reader, self._writer = await asyncio.wait_for(
                     asyncio.open_connection(self.address, self.port), timeout=self.timeout
                 )
-            except (OSError, asyncio.TimeoutError) as err:
+            except (TimeoutError, OSError) as err:
                 raise TuyaConnectionError(
                     f"cannot reach {self.address}:{self.port}: {err}"
                 ) from err
@@ -200,7 +201,7 @@ class TuyaDevice:
             return None
         try:
             return await asyncio.wait_for(pending.future, timeout=self.timeout)
-        except asyncio.TimeoutError as err:
+        except TimeoutError as err:
             with contextlib.suppress(ValueError):
                 self._pending.remove(pending)
             raise TuyaConnectionError(f"no response to command {cmd:#x}") from err
@@ -279,9 +280,7 @@ class TuyaDevice:
         # 3.1
         if cmd == M.CONTROL:
             enc = base64.b64encode(encrypt_ecb(self._real_key, payload))
-            signature = md5(
-                b"data=" + enc + b"||lpv=3.1||" + self._real_key
-            ).hexdigest()[8:24]
+            signature = md5(b"data=" + enc + b"||lpv=3.1||" + self._real_key).hexdigest()[8:24]
             enc = b"3.1" + signature.encode("latin1") + enc
             return M.pack(seqno, cmd, enc, key=self._real_key)
         return M.pack(seqno, cmd, payload, key=self._real_key)
@@ -330,7 +329,7 @@ class TuyaDevice:
             return M.TuyaMessage(0, cmd, 0, b"")
         try:
             return await asyncio.wait_for(fut, timeout=self.timeout)
-        except asyncio.TimeoutError as err:
+        except TimeoutError as err:
             raise TuyaKeyError("session negotiation timed out") from err
         finally:
             self._raw_waiter = None
@@ -347,7 +346,7 @@ class TuyaDevice:
                 self._buffer = self._consume(self._buffer)
         except asyncio.CancelledError:
             raise
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("%s: read loop error: %s", self.device_id, err)
         finally:
             if not self._closing:
@@ -381,7 +380,8 @@ class TuyaDevice:
             return
 
         if msg.retcode and not decoded:
-            self._resolve(msg, exception=TuyaResponseError(f"device error {msg.retcode}", msg.retcode))
+            err = TuyaResponseError(f"device error {msg.retcode}", msg.retcode)
+            self._resolve(msg, exception=err)
             return
 
         dps = _extract_dps(decoded) if decoded else {}
@@ -429,7 +429,9 @@ class TuyaDevice:
             return
         res = self._listener({"dps": dps})
         if asyncio.iscoroutine(res):
-            asyncio.ensure_future(res)
+            task = asyncio.ensure_future(res)
+            self._bg_tasks.add(task)
+            task.add_done_callback(self._bg_tasks.discard)
 
     # -- payload decoding ---------------------------------------------------
     def _decode_payload(self, payload: bytes) -> dict[str, Any] | None:

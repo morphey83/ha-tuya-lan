@@ -6,7 +6,7 @@ from protocol import crypto
 
 
 def test_udp_key_is_md5_of_public_seed():
-    assert crypto.UDP_KEY == hashlib.md5(b"yGAdlopoPVldABfn").digest()
+    assert hashlib.md5(b"yGAdlopoPVldABfn").digest() == crypto.UDP_KEY
     assert len(crypto.UDP_KEY) == 16
 
 

@@ -28,7 +28,7 @@ async def async_setup_entry(
 
 
 class TuyaLanLight(TuyaLanEntity, LightEntity):
-    def __init__(self, coordinator, description, entry_title) -> None:  # noqa: ANN001
+    def __init__(self, coordinator, description, entry_title) -> None:
         super().__init__(coordinator, description, entry_title)
         opts = self.options
         self._b_min = int(opts.get("brightness_min", 10))

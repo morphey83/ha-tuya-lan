@@ -1,7 +1,6 @@
 {
   "domain": "tuya_lan",
   "name": "Tuya-LAN",
-  "version": "0.1.0",
   "codeowners": ["@morphey83"],
   "config_flow": true,
   "dependencies": [],
@@ -10,5 +9,6 @@
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/morphey83/ha-tuya-lan/issues",
   "loggers": ["custom_components.tuya_lan"],
-  "requirements": ["cryptography>=42.0.0"]
+  "requirements": ["cryptography>=42.0.0"],
+  "version": "0.1.0"
 }

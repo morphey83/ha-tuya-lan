@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from enum import Enum
 
 
@@ -46,14 +47,12 @@ class ProtocolVersion(Enum):
         return self.number >= 3.4
 
     @classmethod
-    def parse(cls, value: "str | float | ProtocolVersion") -> "ProtocolVersion":
+    def parse(cls, value: str | float | ProtocolVersion) -> ProtocolVersion:
         if isinstance(value, ProtocolVersion):
             return value
         text = str(value).strip().lstrip("vV")
-        try:
+        with contextlib.suppress(ValueError):
             text = f"{float(text):.1f}"
-        except ValueError:
-            pass
         for member in cls:
             if member.value == text:
                 return member

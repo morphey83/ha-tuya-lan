@@ -25,7 +25,7 @@ def test_version_parsing_and_flags():
 
 
 def test_build_command_dp_query_v33():
-    real_cmd, payload = _dev("3.3")._build_command(10, dps=None, dp_ids=None)
+    _real_cmd, payload = _dev("3.3")._build_command(10, dps=None, dp_ids=None)
     body = json.loads(payload)
     assert set(body) == {"gwId", "devId", "uid", "t"}
     assert body["devId"] == DID

@@ -42,14 +42,14 @@ def _pkcs7_unpad(data: bytes) -> bytes:
 
 
 def encrypt_ecb(key: bytes, plaintext: bytes) -> bytes:
-    encryptor = Cipher(algorithms.AES(key), modes.ECB()).encryptor()  # noqa: S305
+    encryptor = Cipher(algorithms.AES(key), modes.ECB()).encryptor()
     return encryptor.update(_pkcs7_pad(plaintext)) + encryptor.finalize()
 
 
 def decrypt_ecb(key: bytes, ciphertext: bytes) -> bytes:
     if len(ciphertext) % 16:
         raise ValueError("ECB ciphertext length is not a multiple of 16")
-    decryptor = Cipher(algorithms.AES(key), modes.ECB()).decryptor()  # noqa: S305
+    decryptor = Cipher(algorithms.AES(key), modes.ECB()).decryptor()
     return _pkcs7_unpad(decryptor.update(ciphertext) + decryptor.finalize())
 
 
@@ -60,7 +60,7 @@ def encrypt_ecb_block(key: bytes, block16: bytes) -> bytes:
     """
     if len(block16) != 16:
         raise ValueError("block must be exactly 16 bytes")
-    encryptor = Cipher(algorithms.AES(key), modes.ECB()).encryptor()  # noqa: S305
+    encryptor = Cipher(algorithms.AES(key), modes.ECB()).encryptor()
     return encryptor.update(block16) + encryptor.finalize()
 
 

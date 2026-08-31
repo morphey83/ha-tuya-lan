@@ -130,7 +130,12 @@ class TuyaLanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.async_set_updated_data(dict(self.dps))
         self.hass.bus.async_fire(
             EVENT_DP_UPDATE,
-            {"device_id": self.device_id, "entry_id": self.entry.entry_id, "dps": dps, "ts": time.time()},
+            {
+                "device_id": self.device_id,
+                "entry_id": self.entry.entry_id,
+                "dps": dps,
+                "ts": time.time(),
+            },
         )
 
     # -- writes ------------------------------------------------------

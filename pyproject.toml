@@ -1,0 +1,29 @@
+[project]
+name = "ha-tuya-lan"
+version = "0.1.0"
+description = "Fully local, cloud-free Home Assistant integration for Tuya devices"
+requires-python = ">=3.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "RUF"]
+ignore = [
+    "RUF001", "RUF002", "RUF003",  # ambiguous unicode (Cyrillic comments/strings)
+    "B008",                         # function call in default arg (voluptuous schemas)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "SLF001", "B017"]
+"tools/*" = ["T201"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["custom_components", "protocol", "profiles"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning"]

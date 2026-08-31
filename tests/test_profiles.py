@@ -19,9 +19,7 @@ def test_bundled_profiles_load_and_validate():
 
 def test_switch_profile_matches_a_plain_relay():
     loaded = P.load_profiles()
-    best = P.suggest_profile(
-        loaded, product_key=None, dps={"1"}, version="3.3"
-    )
+    best = P.suggest_profile(loaded, product_key=None, dps={"1"}, version="3.3")
     assert best is not None
     assert best.id in ("generic_switch", "generic_2gang_switch")
 

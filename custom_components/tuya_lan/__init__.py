@@ -118,7 +118,11 @@ async def _async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 def _entry_platforms(profile: Profile | None) -> list[Platform]:
     if profile is None:
         return []
-    wanted = {PLATFORMS_BY_ENTITY[e["platform"]] for e in profile.entities if e["platform"] in PLATFORMS_BY_ENTITY}
+    wanted = {
+        PLATFORMS_BY_ENTITY[e["platform"]]
+        for e in profile.entities
+        if e["platform"] in PLATFORMS_BY_ENTITY
+    }
     return [p for p in ALL_PLATFORMS if p in wanted]
 
 
@@ -176,4 +180,6 @@ def _register_services(hass: HomeAssistant) -> None:
         schema=_DUMP_SCHEMA,
         supports_response=SupportsResponse.ONLY,
     )
-    hass.services.async_register(DOMAIN, SERVICE_RELOAD_PROFILES, _reload_profiles, schema=vol.Schema({}))
+    hass.services.async_register(
+        DOMAIN, SERVICE_RELOAD_PROFILES, _reload_profiles, schema=vol.Schema({})
+    )

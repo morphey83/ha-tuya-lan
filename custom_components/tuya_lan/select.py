@@ -27,7 +27,7 @@ async def async_setup_entry(
 
 
 class TuyaLanSelect(TuyaLanEntity, SelectEntity):
-    def __init__(self, coordinator, description, entry_title) -> None:  # noqa: ANN001
+    def __init__(self, coordinator, description, entry_title) -> None:
         super().__init__(coordinator, description, entry_title)
         self._map: dict[str, object] = dict(self.options.get("map", {}))
         self._rev = {str(v): k for k, v in self._map.items()}

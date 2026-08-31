@@ -20,7 +20,7 @@ async def async_get_config_entry_diagnostics(
     coordinator = runtime.coordinator
     try:
         live = await coordinator.async_dump_dps()
-    except Exception as err:  # noqa: BLE001
+    except Exception as err:
         live = {"error": str(err)}
     return {
         "entry": {

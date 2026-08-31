@@ -44,8 +44,12 @@ def test_hmac_frame_detects_tampering():
 def test_gcm_frame_round_trip_strips_retcode():
     # 6699 keeps the retcode inside the plaintext; strip only when JSON follows.
     frame = M.pack(
-        7, M.CONTROL_NEW, RET0 + b'{"dps":{"1":false}}',
-        key=KEY, use_gcm=True, nonce=b"z" * 12,
+        7,
+        M.CONTROL_NEW,
+        RET0 + b'{"dps":{"1":false}}',
+        key=KEY,
+        use_gcm=True,
+        nonce=b"z" * 12,
     )
     msgs, leftover = M.unpack_stream(frame, key=KEY, use_hmac=False)
     assert leftover == b""

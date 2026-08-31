@@ -18,7 +18,7 @@ async def async_setup_entry(
 
 
 class TuyaLanSensor(TuyaLanEntity, SensorEntity):
-    def __init__(self, coordinator, description, entry_title) -> None:  # noqa: ANN001
+    def __init__(self, coordinator, description, entry_title) -> None:
         super().__init__(coordinator, description, entry_title)
         self._attr_device_class = description.get("device_class")
         self._attr_state_class = description.get("state_class")

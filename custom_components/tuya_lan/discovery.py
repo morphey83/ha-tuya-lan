@@ -33,9 +33,7 @@ class TuyaDiscovery:
         self._callbacks: set[Callable[[DiscoveredDevice], None]] = set()
         self._started = False
 
-    def async_add_listener(
-        self, cb: Callable[[DiscoveredDevice], None]
-    ) -> Callable[[], None]:
+    def async_add_listener(self, cb: Callable[[DiscoveredDevice], None]) -> Callable[[], None]:
         self._callbacks.add(cb)
         return lambda: self._callbacks.discard(cb)
 

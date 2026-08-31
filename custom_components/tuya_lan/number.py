@@ -18,7 +18,7 @@ async def async_setup_entry(
 
 
 class TuyaLanNumber(TuyaLanEntity, NumberEntity):
-    def __init__(self, coordinator, description, entry_title) -> None:  # noqa: ANN001
+    def __init__(self, coordinator, description, entry_title) -> None:
         super().__init__(coordinator, description, entry_title)
         opts = self.options
         self._attr_native_min_value = opts.get("min", 0)

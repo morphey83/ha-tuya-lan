@@ -35,7 +35,7 @@ def decrypt_broadcast(data: bytes) -> dict[str, Any] | None:
             return json.loads(data)
     try:
         messages, _ = M.unpack_stream(data, key=UDP_KEY, use_hmac=False)
-    except Exception:  # noqa: BLE001
+    except Exception:
         messages = []
     for msg in messages:
         body = msg.payload
@@ -88,7 +88,7 @@ async def open_listeners(
         with contextlib.suppress(OSError):
             transport, _ = await loop.create_datagram_endpoint(
                 lambda: _Proto(on_payload),
-                local_addr=("0.0.0.0", port),  # noqa: S104
+                local_addr=("0.0.0.0", port),
                 reuse_port=reuse_port,
                 allow_broadcast=True,
             )

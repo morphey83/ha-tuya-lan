@@ -175,7 +175,7 @@ def _decode_frame(
         aad = frame[4 : _HDR_6699.size]
         try:
             plaintext = decrypt_gcm(key, nonce, ciphertext, tag, aad)
-        except Exception as err:  # noqa: BLE001 - InvalidTag & friends
+        except Exception as err:
             raise TuyaDecodeError(f"GCM auth failed: {err}") from err
         # Unlike 55AA frames, the 4-byte return code on a 6699 frame lives
         # *inside* the GCM plaintext and is not always present (broadcasts and

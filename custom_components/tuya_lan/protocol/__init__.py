@@ -16,13 +16,13 @@ from .message import TuyaMessage
 from .version import ProtocolVersion
 
 __all__ = [
-    "TuyaDevice",
-    "TuyaDeviceListener",
-    "TuyaMessage",
     "ProtocolVersion",
-    "TuyaProtocolError",
     "TuyaConnectionError",
     "TuyaDecodeError",
+    "TuyaDevice",
+    "TuyaDeviceListener",
     "TuyaKeyError",
+    "TuyaMessage",
+    "TuyaProtocolError",
     "TuyaResponseError",
 ]
