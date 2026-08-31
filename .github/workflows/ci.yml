@@ -10,12 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: uv pip install --system cryptography pyyaml voluptuous pytest pytest-asyncio ruff
+        run: |
+          python -m pip install --upgrade pip
+          pip install cryptography pyyaml voluptuous pytest pytest-asyncio ruff
       - name: Ruff (lint)
         run: ruff check custom_components tools tests
       - name: Ruff (format)
@@ -29,11 +30,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: home-assistant/actions/hassfest@master
 
+  # Validates against the *default HACS store* criteria. Not required for a
+  # custom repository install, so failures here are informational only.
   hacs:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: HACS validation
-        uses: hacs/action@main
+      - uses: hacs/action@main
         with:
           category: integration
+          ignore: brands
