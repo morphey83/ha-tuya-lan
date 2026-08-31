@@ -130,7 +130,9 @@ def unpack_stream(buffer: bytes, *, key: bytes, use_hmac: bool) -> tuple[list[Tu
     while True:
         start = _find_frame_start(buffer)
         if start < 0:
-            return messages, b""
+            # No frame start yet - keep the last 3 bytes in case a 4-byte magic
+            # prefix was split across this read and the next one.
+            return messages, buffer[-3:]
         if start > 0:
             buffer = buffer[start:]
 

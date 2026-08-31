@@ -181,9 +181,9 @@ class TuyaDevice:
             await self.connect()
 
         real_cmd, payload = self._build_command(cmd, dps=dps, dp_ids=dp_ids)
-        frame = self._encode(real_cmd, payload)
 
         async with self._send_lock:
+            frame = self._encode(real_cmd, payload)
             pending = _Pending(cmd) if expect_response else None
             if pending is not None:
                 self._pending.append(pending)
@@ -278,8 +278,6 @@ class TuyaDevice:
 
         # 3.1
         if cmd == M.CONTROL:
-            import base64
-
             enc = base64.b64encode(encrypt_ecb(self._real_key, payload))
             signature = md5(
                 b"data=" + enc + b"||lpv=3.1||" + self._real_key
