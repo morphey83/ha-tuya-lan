@@ -2,7 +2,7 @@
 cryptography>=42.0.0
 
 # Home Assistant (for type checking / running the test suite against HA stubs)
-homeassistant>=2024.8.0
+homeassistant>=2025.2.0
 
 # Tooling
 pytest>=8.0

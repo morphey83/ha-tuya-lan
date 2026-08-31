@@ -44,6 +44,7 @@ class TuyaLanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=entry,
             name=f"{DOMAIN} {self.device_id}",
             update_interval=None if poll <= 0 else timedelta(seconds=float(poll)),
         )
@@ -95,14 +96,24 @@ class TuyaLanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             return False
 
     async def _watchdog_loop(self) -> None:
+        was_connected = True
         while not self._closing:
             await asyncio.sleep(RECONNECT_INTERVAL)
             if self._closing:
                 return
-            if not self._device.connected:
-                _LOGGER.info("%s: reconnecting", self.device_id)
-                if await self._connect():
-                    self.async_set_updated_data(dict(self.dps))
+            if self._device.connected:
+                continue
+            if was_connected:
+                _LOGGER.debug(
+                    "%s: connection lost, retrying every %ss",
+                    self.device_id,
+                    RECONNECT_INTERVAL,
+                )
+            was_connected = False
+            if await self._connect():
+                was_connected = True
+                _LOGGER.debug("%s: reconnected", self.device_id)
+                self.async_set_updated_data(dict(self.dps))
 
     # -- polling ---------------------------------------------------------
     async def _async_update_data(self) -> dict[str, Any]:

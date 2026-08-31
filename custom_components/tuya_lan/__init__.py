@@ -16,7 +16,7 @@ from homeassistant.core import (
     SupportsResponse,
     callback,
 )
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import ConfigEntryError, HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 
 from .const import (
@@ -30,6 +30,7 @@ from .const import (
 from .coordinator import TuyaLanCoordinator
 from .discovery import TuyaDiscovery
 from .profiles import Profile, load_profiles
+from .protocol.exceptions import TuyaKeyError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,10 +62,9 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     hass.data.setdefault(DOMAIN, {})
     store = hass.data[DOMAIN]
 
-    if "discovery" not in store:
-        discovery = TuyaDiscovery()
-        store["discovery"] = discovery
-        await discovery.async_start()
+    # The discovery object is created lazily and only *started* by the config
+    # flow, so simply installing the integration touches no sockets.
+    store.setdefault("discovery", TuyaDiscovery())
 
     if "profiles" not in store:
         store["profiles"] = await _async_load_profiles(hass)
@@ -77,7 +77,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await async_setup(hass, {})
     store = hass.data[DOMAIN]
 
-    coordinator = TuyaLanCoordinator(hass, entry)
+    try:
+        coordinator = TuyaLanCoordinator(hass, entry)
+    except TuyaKeyError as err:
+        raise ConfigEntryError(f"Invalid local key for {entry.title}: {err}") from err
     await coordinator.async_setup()
 
     profile_id = {**entry.data, **entry.options}.get(CONF_PROFILE)
