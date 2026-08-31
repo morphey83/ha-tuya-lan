@@ -1,0 +1,15 @@
+id: generic_light_dimmer
+name: Generic dimmable light
+match:
+  required_dps: [20]
+  any_dps: [20, 22]
+entities:
+  - platform: light
+    key: light
+    name: null
+    dps:
+      switch: "20"
+      brightness: "22"
+    options:
+      brightness_min: 10
+      brightness_max: 1000

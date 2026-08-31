@@ -1,0 +1,15 @@
+id: generic_2gang_switch
+name: Generic 2-gang switch
+match:
+  required_dps: [1, 2]
+entities:
+  - platform: switch
+    key: ch1
+    name: Channel 1
+    dps: { switch: "1" }
+    icon: mdi:light-switch
+  - platform: switch
+    key: ch2
+    name: Channel 2
+    dps: { switch: "2" }
+    icon: mdi:light-switch

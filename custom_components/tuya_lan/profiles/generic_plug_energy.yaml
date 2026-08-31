@@ -1,0 +1,35 @@
+id: generic_plug_energy
+name: Generic smart plug with energy metering
+match:
+  required_dps: [1]
+  any_dps: [18, 19, 20]
+entities:
+  - platform: switch
+    key: switch
+    name: null
+    dps:
+      switch: "1"
+    icon: mdi:power-socket
+  - platform: sensor
+    key: current
+    name: Current
+    dps: { sensor: "18" }
+    device_class: current
+    state_class: measurement
+    unit_of_measurement: mA
+  - platform: sensor
+    key: power
+    name: Power
+    dps: { sensor: "19" }
+    device_class: power
+    state_class: measurement
+    unit_of_measurement: W
+    options: { scale: 10 }
+  - platform: sensor
+    key: voltage
+    name: Voltage
+    dps: { sensor: "20" }
+    device_class: voltage
+    state_class: measurement
+    unit_of_measurement: V
+    options: { scale: 10 }

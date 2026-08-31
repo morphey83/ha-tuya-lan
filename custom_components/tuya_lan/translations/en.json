@@ -1,0 +1,62 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a Tuya device",
+        "description": "{count} device(s) were heard on the network and are not configured yet. Pick one, or enter a device by hand.",
+        "data": { "device": "Device" }
+      },
+      "manual": {
+        "title": "Enter a Tuya device",
+        "description": "You need the device id and its local key. See the documentation for offline ways to obtain the key.",
+        "data": {
+          "device_id": "Device ID",
+          "host": "IP address",
+          "local_key": "Local key",
+          "protocol_version": "Protocol version",
+          "port": "Port"
+        }
+      },
+      "credentials": {
+        "title": "Local key",
+        "description": "Device {device_id} at {host}. Paste the local key and confirm the protocol version; Home Assistant will connect to check.",
+        "data": {
+          "local_key": "Local key",
+          "protocol_version": "Protocol version"
+        }
+      },
+      "profile": {
+        "title": "Choose a profile",
+        "description": "Live data points: {dps}.\n\nA profile decides which entities are created. Pick a bundled profile, let Home Assistant detect one, or choose Raw.",
+        "data": { "profile": "Profile", "title": "Name" }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach the device. Check the IP address and that no other app holds the connection.",
+      "invalid_key": "The device refused the local key (or the protocol version is wrong).",
+      "unknown": "Unexpected error - see the logs."
+    },
+    "abort": {
+      "already_configured": "This device is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Tuya-LAN options",
+        "data": {
+          "local_key": "Local key",
+          "protocol_version": "Protocol version",
+          "profile": "Profile",
+          "poll_interval": "Poll interval (0 = push only)",
+          "host": "IP address (override)"
+        }
+      }
+    }
+  },
+  "services": {
+    "set_dp": { "name": "Set data point", "description": "Write a raw value to a device data point." },
+    "dump_dps": { "name": "Dump data points", "description": "Return every data point and its value." },
+    "reload_profiles": { "name": "Reload profiles", "description": "Re-read profiles from disk and reload all entries." }
+  }
+}

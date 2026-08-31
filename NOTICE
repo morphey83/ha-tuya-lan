@@ -1,0 +1,16 @@
+Tuya-LAN for Home Assistant
+Copyright 2026 the Tuya-LAN for Home Assistant contributors
+
+This product includes a clean-room asynchronous re-implementation of the Tuya
+LAN protocol (versions 3.1 - 3.5). The wire format, command constants and
+session-key negotiation were derived from:
+
+  * the public Tuya IoT OS header "lan_protocol.h"
+    https://github.com/tuya/tuya-iotos-embeded-sdk-wifi-ble-bk7231n
+  * tinytuya (Apache-2.0)   - https://github.com/jasonacox/tinytuya
+  * localtuya (Apache-2.0)  - https://github.com/rospogrigio/localtuya
+
+The well-known UDP discovery key originates from the tuya-convert project.
+
+No third-party code is bundled; the implementation in custom_components/tuya_lan/
+protocol/ was written for this project.

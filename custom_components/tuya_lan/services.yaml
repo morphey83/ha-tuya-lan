@@ -1,0 +1,46 @@
+set_dp:
+  name: Set data point
+  description: >
+    Write a raw value to a device data point (DP). Use this for anything a
+    profile does not expose yet.
+  fields:
+    device_id:
+      name: Device ID
+      description: The Tuya device id (22 characters), as shown on the device page.
+      required: true
+      example: "bf1234567890abcdef1234"
+      selector:
+        text:
+    dp:
+      name: DP
+      description: Data point number.
+      required: true
+      example: "1"
+      selector:
+        text:
+    value:
+      name: Value
+      description: Boolean, number or string. Types must match what the device expects.
+      required: true
+      example: true
+      selector:
+        object:
+
+dump_dps:
+  name: Dump data points
+  description: >
+    Connect to the device and return every data point with its current value.
+    Handy for building or debugging a profile.
+  fields:
+    device_id:
+      name: Device ID
+      description: The Tuya device id.
+      required: true
+      selector:
+        text:
+
+reload_profiles:
+  name: Reload profiles
+  description: >
+    Re-read all bundled and user profiles from disk and reload every Tuya-LAN
+    entry. Run this after editing a file in <config>/tuya_lan/profiles/.

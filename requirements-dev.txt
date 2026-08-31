@@ -1,0 +1,12 @@
+# Runtime
+cryptography>=42.0.0
+
+# Home Assistant (for type checking / running the test suite against HA stubs)
+homeassistant>=2024.8.0
+
+# Tooling
+pytest>=8.0
+pytest-asyncio>=0.23
+pytest-homeassistant-custom-component>=0.13.100
+ruff>=0.5.0
+mypy>=1.10

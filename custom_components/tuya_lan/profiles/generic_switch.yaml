@@ -1,0 +1,12 @@
+id: generic_switch
+name: Generic switch / relay
+match:
+  any_dps: [1]
+  required_dps: [1]
+entities:
+  - platform: switch
+    key: switch
+    name: null
+    dps:
+      switch: "1"
+    icon: mdi:light-switch
