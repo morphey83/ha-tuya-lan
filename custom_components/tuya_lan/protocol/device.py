@@ -21,6 +21,7 @@ from .exceptions import (
     TuyaConnectionError,
     TuyaDecodeError,
     TuyaKeyError,
+    TuyaProtocolError,
     TuyaResponseError,
 )
 from .version import ProtocolVersion
@@ -92,12 +93,15 @@ class TuyaDevice:
         self._conn_lock = asyncio.Lock()
         self._raw_waiter: tuple[int, asyncio.Future[M.TuyaMessage]] | None = None
         self._bg_tasks: set[asyncio.Task[Any]] = set()
+        self._alive = False
+        self._hb_task: asyncio.Task[None] | None = None
+        self._hb_interval = 10.0
         self._closing = False
 
     # -- lifecycle ---------------------------------------------------------------
     @property
     def connected(self) -> bool:
-        return self._writer is not None and not self._writer.is_closing()
+        return self._alive and self._writer is not None and not self._writer.is_closing()
 
     def set_listener(self, listener: TuyaDeviceListener | None) -> None:
         self._listener = listener
@@ -106,6 +110,12 @@ class TuyaDevice:
         async with self._conn_lock:
             if self.connected:
                 return
+            # Tear down any half-dead state from a previous connection.
+            await self._stop_tasks()
+            if self._writer is not None:
+                self._writer.close()
+                with contextlib.suppress(Exception):
+                    await self._writer.wait_closed()
             self._closing = False
             self._active_key = self._real_key
             self._buffer = b""
@@ -119,6 +129,7 @@ class TuyaDevice:
                     f"cannot reach {self.address}:{self.port}: {err}"
                 ) from err
 
+            self._alive = True
             self._read_task = asyncio.ensure_future(self._read_loop())
 
             if self.version.needs_session:
@@ -128,13 +139,45 @@ class TuyaDevice:
                     await self.close()
                     raise
 
+            self._hb_task = asyncio.ensure_future(self._heartbeat_loop())
+
+    def mark_dead(self) -> None:
+        """Force the next request through a reconnect (used by the coordinator)."""
+        self._alive = False
+
+    async def _heartbeat_loop(self) -> None:
+        """Tuya devices drop an idle LAN socket after ~30 s - keep it warm."""
+        fails = 0
+        try:
+            while self._alive and not self._closing:
+                await asyncio.sleep(self._hb_interval)
+                if not self._alive or self._closing:
+                    return
+                try:
+                    await self.heartbeat()
+                    fails = 0
+                except TuyaProtocolError as err:
+                    fails += 1
+                    _LOGGER.debug("%s: heartbeat failed x%d (%s)", self.device_id, fails, err)
+                    if fails >= 2:
+                        self._alive = False
+                        return
+        except asyncio.CancelledError:
+            raise
+
+    async def _stop_tasks(self) -> None:
+        for attr in ("_hb_task", "_read_task"):
+            task: asyncio.Task[None] | None = getattr(self, attr)
+            if task is not None and task is not asyncio.current_task():
+                task.cancel()
+                with contextlib.suppress(asyncio.CancelledError, Exception):
+                    await task
+            setattr(self, attr, None)
+
     async def close(self) -> None:
         self._closing = True
-        if self._read_task:
-            self._read_task.cancel()
-            with contextlib.suppress(asyncio.CancelledError, Exception):
-                await self._read_task
-            self._read_task = None
+        self._alive = False
+        await self._stop_tasks()
         if self._writer is not None:
             self._writer.close()
             with contextlib.suppress(Exception):
@@ -179,7 +222,7 @@ class TuyaDevice:
         expect_response: bool = True,
     ) -> dict[str, Any] | None:
         if not self.connected:
-            await self.connect()
+            raise TuyaConnectionError("not connected - call connect() first")
 
         real_cmd, payload = self._build_command(cmd, dps=dps, dp_ids=dp_ids)
 
@@ -349,6 +392,9 @@ class TuyaDevice:
         except Exception as err:
             _LOGGER.debug("%s: read loop error: %s", self.device_id, err)
         finally:
+            # The socket is gone (EOF or error) - stop reporting "connected" so
+            # the next request / the coordinator watchdog forces a reconnect.
+            self._alive = False
             if not self._closing:
                 self._fail_pending(TuyaConnectionError("connection lost"))
 

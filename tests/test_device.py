@@ -67,3 +67,25 @@ def test_decode_payload_v35_is_already_plaintext():
 def test_decode_payload_rejects_non_json():
     with pytest.raises(Exception):
         _dev("3.3")._decode_payload(crypto.encrypt_ecb(KEYB, b"not-json-at-all"))
+
+
+def test_connected_tracks_alive_flag():
+    dev = _dev("3.5")
+    assert dev.connected is False  # never connected
+    dev._alive = True  # pretend
+    assert dev.connected is False  # ...but no writer yet
+    dev.mark_dead()
+    assert dev._alive is False
+
+
+async def test_request_without_connection_raises():
+    from protocol.exceptions import TuyaConnectionError
+
+    with pytest.raises(TuyaConnectionError):
+        await _dev("3.3").status()
+
+
+async def test_stop_tasks_is_safe_with_nothing_running():
+    dev = _dev("3.3")
+    await dev._stop_tasks()  # must not raise
+    await dev.close()  # idempotent-ish, must not raise

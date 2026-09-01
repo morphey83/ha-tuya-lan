@@ -122,6 +122,7 @@ class TuyaLanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             fresh = await self._device.status()
         except TuyaConnectionError as err:
+            self._device.mark_dead()  # force a reconnect next cycle
             self.available = False
             raise UpdateFailed(str(err)) from err
         except TuyaProtocolError as err:
