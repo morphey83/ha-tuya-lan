@@ -18,6 +18,7 @@ from homeassistant.core import (
 )
 from homeassistant.exceptions import ConfigEntryError, HomeAssistantError
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_registry as er
 
 from .const import (
     CONF_PROFILE,
@@ -96,6 +97,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     store.setdefault("entries", {})[entry.entry_id] = RuntimeData(coordinator, profile)
 
+    _purge_orphan_entities(hass, entry, coordinator.device_id, profile)
+
     platforms = _entry_platforms(profile)
     await hass.config_entries.async_forward_entry_setups(entry, platforms)
     entry.async_on_unload(entry.add_update_listener(_async_reload_entry))
@@ -115,6 +118,26 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def _async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     await hass.config_entries.async_reload(entry.entry_id)
+
+
+@callback
+def _purge_orphan_entities(
+    hass: HomeAssistant, entry: ConfigEntry, device_id: str, profile: Profile | None
+) -> None:
+    """Drop registry entities the current profile no longer defines.
+
+    Switching profiles (e.g. Detect -> a real one) otherwise leaves the old
+    entities behind as permanently "unavailable" ghosts.
+    """
+    registry = er.async_get(hass)
+    expected = {
+        f"{device_id}_{e.get('key') or e['platform']}"
+        for e in (profile.entities if profile else [])
+    }
+    for reg_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if reg_entry.unique_id not in expected:
+            _LOGGER.debug("removing orphaned entity %s", reg_entry.entity_id)
+            registry.async_remove(reg_entry.entity_id)
 
 
 @callback
