@@ -30,7 +30,7 @@ async def async_setup_entry(
 class TuyaLanFan(TuyaLanEntity, FanEntity):
     def __init__(self, coordinator, description, entry_title) -> None:
         super().__init__(coordinator, description, entry_title)
-        opts = self.options
+        opts = self.dp_options
         self._speed_range = (1, int(opts.get("speed_count", 3)))
         self._attr_supported_features = FanEntityFeature(0)
         if self._dp("percentage"):

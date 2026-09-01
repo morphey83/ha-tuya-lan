@@ -29,7 +29,7 @@ class TuyaLanSensor(TuyaLanEntity, SensorEntity):
         raw = self._value("sensor")
         if raw is None:
             return None
-        mapping = self.options.get("map")
+        mapping = self.dp_options.get("map")
         if isinstance(mapping, dict):
             return mapping.get(str(raw), raw)
-        return scale_from_device(raw, self.options)
+        return scale_from_device(raw, self.dp_options)

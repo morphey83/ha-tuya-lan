@@ -23,7 +23,7 @@ class TuyaLanBinarySensor(TuyaLanEntity, BinarySensorEntity):
     def __init__(self, coordinator, description, entry_title) -> None:
         super().__init__(coordinator, description, entry_title)
         self._attr_device_class = description.get("device_class")
-        opts = self.options
+        opts = self.dp_options
         self._on_values = {str(v).lower() for v in opts.get("on_values", ["true", "1", "on"])}
 
     @property

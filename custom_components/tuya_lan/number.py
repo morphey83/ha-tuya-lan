@@ -20,7 +20,7 @@ async def async_setup_entry(
 class TuyaLanNumber(TuyaLanEntity, NumberEntity):
     def __init__(self, coordinator, description, entry_title) -> None:
         super().__init__(coordinator, description, entry_title)
-        opts = self.options
+        opts = self.dp_options
         self._attr_native_min_value = opts.get("min", 0)
         self._attr_native_max_value = opts.get("max", 100)
         self._attr_native_step = opts.get("step", 1)
@@ -30,7 +30,7 @@ class TuyaLanNumber(TuyaLanEntity, NumberEntity):
     @property
     def native_value(self):
         raw = self._value("number")
-        return None if raw is None else scale_from_device(raw, self.options)
+        return None if raw is None else scale_from_device(raw, self.dp_options)
 
     async def async_set_native_value(self, value: float) -> None:
-        await self._set("number", scale_to_device(value, self.options))
+        await self._set("number", scale_to_device(value, self.dp_options))

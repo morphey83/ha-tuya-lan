@@ -30,7 +30,7 @@ async def async_setup_entry(
 class TuyaLanLight(TuyaLanEntity, LightEntity):
     def __init__(self, coordinator, description, entry_title) -> None:
         super().__init__(coordinator, description, entry_title)
-        opts = self.options
+        opts = self.dp_options
         self._b_min = int(opts.get("brightness_min", 10))
         self._b_max = int(opts.get("brightness_max", 255))
         if self._dp("brightness"):

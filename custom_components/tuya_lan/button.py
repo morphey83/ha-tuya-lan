@@ -19,5 +19,5 @@ async def async_setup_entry(
 
 class TuyaLanButton(TuyaLanEntity, ButtonEntity):
     async def async_press(self) -> None:
-        value = self.options.get("press_value", True)
+        value = self.dp_options.get("press_value", True)
         await self._set("button", value)

@@ -63,7 +63,12 @@ class TuyaLanEntity(CoordinatorEntity[TuyaLanCoordinator]):
         await self.coordinator.async_set_dp(dp, value)
 
     @property
-    def options(self) -> dict[str, Any]:
+    def dp_options(self) -> dict[str, Any]:
+        """Profile-supplied tuning for this entity (scale, map, limits, ...).
+
+        Deliberately NOT named ``options`` - that clashes with HA's enum-sensor
+        ``SensorEntity.options`` / ``SelectEntity.options``.
+        """
         return self._desc.get("options") or {}
 
     @property
