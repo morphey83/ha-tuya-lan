@@ -95,7 +95,8 @@ class TuyaDevice:
         self._bg_tasks: set[asyncio.Task[Any]] = set()
         self._alive = False
         self._hb_task: asyncio.Task[None] | None = None
-        self._hb_interval = 10.0
+        self._hb_interval = 20.0  # send a keepalive only after this much idle time
+        self._last_activity = 0.0
         self._closing = False
 
     # -- lifecycle ---------------------------------------------------------------
@@ -146,13 +147,20 @@ class TuyaDevice:
         self._alive = False
 
     async def _heartbeat_loop(self) -> None:
-        """Tuya devices drop an idle LAN socket after ~30 s - keep it warm."""
+        """Keep an otherwise idle socket warm (Tuya drops it after ~30 s).
+
+        Skips the heartbeat whenever a normal request went out recently, so a
+        fast-polling coordinator effectively disables this loop.
+        """
+        loop = asyncio.get_running_loop()
         fails = 0
         try:
             while self._alive and not self._closing:
-                await asyncio.sleep(self._hb_interval)
+                await asyncio.sleep(2.0)
                 if not self._alive or self._closing:
                     return
+                if loop.time() - self._last_activity < self._hb_interval:
+                    continue
                 try:
                     await self.heartbeat()
                     fails = 0
@@ -238,6 +246,7 @@ class TuyaDevice:
             try:
                 self._writer.write(frame)
                 await self._writer.drain()
+                self._last_activity = asyncio.get_running_loop().time()
             except OSError as err:
                 if pending is not None and pending in self._pending:
                     self._pending.remove(pending)

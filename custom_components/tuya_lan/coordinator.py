@@ -117,19 +117,31 @@ class TuyaLanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     # -- polling ---------------------------------------------------------
     async def _async_update_data(self) -> dict[str, Any]:
-        if not self._device.connected and not await self._connect():
-            raise UpdateFailed(f"{self.device_id} is unreachable")
-        try:
-            fresh = await self._device.status()
-        except TuyaConnectionError as err:
-            self._device.mark_dead()  # force a reconnect next cycle
-            self.available = False
-            raise UpdateFailed(str(err)) from err
-        except TuyaProtocolError as err:
-            raise UpdateFailed(str(err)) from err
-        self.available = True
-        self.dps.update(fresh)
-        return dict(self.dps)
+        _LOGGER.debug(
+            "%s: poll (interval=%s, connected=%s)",
+            self.device_id,
+            self.update_interval,
+            self._device.connected,
+        )
+        last: Exception | None = None
+        for _attempt in (1, 2):  # one transient retry (with a reconnect) before failing
+            if not self._device.connected and not await self._connect():
+                last = TuyaConnectionError(f"{self.device_id} is unreachable")
+                continue
+            try:
+                fresh = await self._device.status()
+            except TuyaConnectionError as err:
+                self._device.mark_dead()  # force a reconnect on the retry / next cycle
+                last = err
+                continue
+            except TuyaProtocolError as err:
+                last = err
+                continue
+            self.available = True
+            self.dps.update(fresh)
+            return dict(self.dps)
+        self.available = False
+        raise UpdateFailed(str(last))
 
     # -- push ----------------------------------------------------------
     @callback
@@ -137,6 +149,7 @@ class TuyaLanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         dps = message.get("dps") or {}
         if not dps:
             return
+        _LOGGER.debug("%s: push update, %d DP(s): %s", self.device_id, len(dps), list(dps))
         self.dps.update({str(k): v for k, v in dps.items()})
         self.available = True
         self.async_set_updated_data(dict(self.dps))
