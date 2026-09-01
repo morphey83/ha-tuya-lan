@@ -1,0 +1,219 @@
+id: kws_306wf
+name: KWS-306WF T1 (3-phase energy meter)
+# Decoded from a live DP dump. Scales for V/I/P are cross-checked
+# (phase C: 226.46 V x 7.425 A ~= 1675 W). Energy scale (0.01 kWh) and the
+# frequency/PF mappings are best-effort - compare against the meter's own
+# display and report anything off.
+match:
+  product_key: 8afses1qqzgmof1w
+  any_dps: ["125", "128", "131", "132", "135"]
+
+entities:
+  # ---- Totals -------------------------------------------------------------
+  - platform: sensor
+    key: power_total
+    name: Total power
+    dps: { sensor: "135" }
+    device_class: power
+    state_class: measurement
+    unit_of_measurement: W
+  - platform: sensor
+    key: energy_total
+    name: Total energy
+    dps: { sensor: "1" }
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: kWh
+    options: { scale: 100 }
+
+  # ---- Phase A ----------------------------------------------------------
+  - platform: sensor
+    key: voltage_a
+    name: Voltage A
+    dps: { sensor: "125" }
+    device_class: voltage
+    state_class: measurement
+    unit_of_measurement: V
+    options: { scale: 100 }
+  - platform: sensor
+    key: current_a
+    name: Current A
+    dps: { sensor: "126" }
+    device_class: current
+    state_class: measurement
+    unit_of_measurement: A
+    options: { scale: 1000 }
+  - platform: sensor
+    key: power_a
+    name: Power A
+    dps: { sensor: "127" }
+    device_class: power
+    state_class: measurement
+    unit_of_measurement: W
+  - platform: sensor
+    key: energy_a
+    name: Energy A
+    dps: { sensor: "102" }
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: kWh
+    options: { scale: 100 }
+
+  # ---- Phase B ----------------------------------------------------------
+  - platform: sensor
+    key: voltage_b
+    name: Voltage B
+    dps: { sensor: "128" }
+    device_class: voltage
+    state_class: measurement
+    unit_of_measurement: V
+    options: { scale: 100 }
+  - platform: sensor
+    key: current_b
+    name: Current B
+    dps: { sensor: "129" }
+    device_class: current
+    state_class: measurement
+    unit_of_measurement: A
+    options: { scale: 1000 }
+  - platform: sensor
+    key: power_b
+    name: Power B
+    dps: { sensor: "130" }
+    device_class: power
+    state_class: measurement
+    unit_of_measurement: W
+  - platform: sensor
+    key: energy_b
+    name: Energy B
+    dps: { sensor: "104" }
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: kWh
+    options: { scale: 100 }
+
+  # ---- Phase C ----------------------------------------------------------
+  - platform: sensor
+    key: voltage_c
+    name: Voltage C
+    dps: { sensor: "131" }
+    device_class: voltage
+    state_class: measurement
+    unit_of_measurement: V
+    options: { scale: 100 }
+  - platform: sensor
+    key: current_c
+    name: Current C
+    dps: { sensor: "132" }
+    device_class: current
+    state_class: measurement
+    unit_of_measurement: A
+    options: { scale: 1000 }
+  - platform: sensor
+    key: power_c
+    name: Power C
+    dps: { sensor: "133" }
+    device_class: power
+    state_class: measurement
+    unit_of_measurement: W
+  - platform: sensor
+    key: energy_c
+    name: Energy C
+    dps: { sensor: "105" }
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: kWh
+    options: { scale: 100 }
+
+  # ---- Grid / status (mapping tentative) ------------------------------
+  - platform: sensor
+    key: frequency
+    name: Frequency
+    dps: { sensor: "107" }
+    device_class: frequency
+    state_class: measurement
+    unit_of_measurement: Hz
+  - platform: binary_sensor
+    key: breaker
+    name: Breaker closed
+    dps: { sensor: "141" }
+
+  # ---- Unmapped DPs, kept visible as diagnostics ----------------------
+  - platform: sensor
+    key: dp101
+    name: DP 101
+    dps: { sensor: "101" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp103
+    name: DP 103
+    dps: { sensor: "103" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp106
+    name: DP 106 (energy C alt?)
+    dps: { sensor: "106" }
+    entity_category: diagnostic
+    options: { scale: 100 }
+  - platform: sensor
+    key: dp108
+    name: DP 108
+    dps: { sensor: "108" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp110
+    name: DP 110
+    dps: { sensor: "110" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp111
+    name: DP 111
+    dps: { sensor: "111" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp112
+    name: DP 112 (limit?)
+    dps: { sensor: "112" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp113
+    name: DP 113 (limit?)
+    dps: { sensor: "113" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp115
+    name: DP 115 (limit?)
+    dps: { sensor: "115" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp121
+    name: DP 121 (mode)
+    dps: { sensor: "121" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp122
+    name: DP 122
+    dps: { sensor: "122" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp124
+    name: DP 124 (PF A?)
+    dps: { sensor: "124" }
+    entity_category: diagnostic
+    options: { scale: 100 }
+  - platform: sensor
+    key: dp136
+    name: DP 136 (fwd energy total?)
+    dps: { sensor: "136" }
+    entity_category: diagnostic
+    options: { scale: 100 }
+  - platform: sensor
+    key: dp140
+    name: DP 140 (fault code?)
+    dps: { sensor: "140" }
+    entity_category: diagnostic
+  - platform: sensor
+    key: dp142
+    name: DP 142 (fault code?)
+    dps: { sensor: "142" }
+    entity_category: diagnostic
