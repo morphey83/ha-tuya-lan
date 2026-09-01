@@ -22,16 +22,21 @@ The integration can:
 
 Tuya's local protocol encrypts traffic with a per‑device **local key**. That key is
 normally handed out by Tuya's cloud when the device is paired. This integration
-never contacts the cloud, so **you supply the key yourself**. Accepted sources:
+**never contacts the cloud at run time**, so you supply the key once, up front.
+Ways to get it:
 
-1. A key you already extracted (e.g. from a previous `tinytuya` / LocalTuya setup,
-   from a router/app packet capture during pairing, or from `cloudcutter`).
-2. A rooted‑app / ADB backup of the Smart Life app (`data/`),
-   from which the bundled `tools/tuya_lan_probe.py --extract-keys` can read the cache.
-3. Devices in AP/pairing mode that still use the well‑known default key
-   (older firmware) — auto‑tried during discovery.
+1. **Tuya IoT Platform** — a one‑time read of your own account. Create a free
+   cloud project, link your Smart Life app by QR, then run
+   `python tools/tuya_lan_cloud_keys.py --region eu --client-id … --client-secret …`
+   to print every device's `local_key`. Least effort, works for almost anything.
+2. A key you already extracted (previous `tinytuya` / LocalTuya setup, packet
+   capture during pairing, `cloudcutter`).
+3. An ADB backup of the Smart Life app —
+   `python tools/tuya_lan_probe.py extract-keys <unpacked-backup>` scans it.
+4. Devices in AP/pairing mode still on the well‑known default key (old firmware) —
+   auto‑tried during discovery.
 
-See [`docs/getting-keys.md`](docs/getting-keys.md) for the detailed, legal, on‑device methods.
+See [`docs/getting-keys.md`](docs/getting-keys.md) for step‑by‑step instructions.
 
 ## Install
 
