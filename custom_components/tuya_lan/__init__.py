@@ -95,6 +95,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 profile_id,
             )
 
+    if profile is not None:
+        coordinator.dp_ids = sorted(
+            {
+                int(v)
+                for e in profile.entities
+                for v in e["dps"].values()
+                if str(v).isdigit()
+            }
+        )
+
     store.setdefault("entries", {})[entry.entry_id] = RuntimeData(coordinator, profile)
 
     _purge_orphan_entities(hass, entry, coordinator.device_id, profile)

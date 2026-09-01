@@ -202,13 +202,12 @@ class TuyaDevice:
         result = await self._request(M.DP_QUERY)
         return _extract_dps(result)
 
-    async def refresh_dps(self, dp_ids: list[int] | None = None) -> None:
+    async def refresh_dps(self, dp_ids: list[int] | list[str] | None = None) -> None:
         """Ask the device to re-report the listed DPs (3.3+); no reply expected."""
         if self.version.number < 3.3:
             return
-        await self._request(
-            M.UPDATE_DPS, dp_ids=dp_ids or [4, 5, 6, 18, 19, 20], expect_response=False
-        )
+        ids = [int(x) for x in (dp_ids or [4, 5, 6, 18, 19, 20])]
+        await self._request(M.UPDATE_DPS, dp_ids=ids, expect_response=False)
 
     async def set_dp(self, dp: str | int, value: Any) -> dict[str, Any]:
         return await self.set_dps({str(dp): value})
@@ -448,6 +447,16 @@ class TuyaDevice:
         # (v3.5 devices reply with their own global seqno, so cmd-FIFO is the
         # only portable correlation.)
         resolved = self._resolve(msg, result=decoded)
+
+        if _LOGGER.isEnabledFor(logging.DEBUG):
+            _LOGGER.debug(
+                "%s: rx cmd=%#x retcode=%s dps=%s resolved_request=%s",
+                self.device_id,
+                msg.cmd,
+                msg.retcode,
+                sorted(dps) or "-",
+                resolved,
+            )
 
         # STATUS pushes (and any DP data not consumed by a request) go to the listener.
         if dps and (msg.cmd == M.STATUS or not resolved):

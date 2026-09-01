@@ -50,6 +50,7 @@ class TuyaLanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         self.dps: dict[str, Any] = {}
         self.available = False
+        self.dp_ids: list[int] = []  # populated from the active profile by __init__
         self._device = TuyaDevice(
             device_id=self.device_id,
             address=data[CONF_HOST],
@@ -129,6 +130,10 @@ class TuyaLanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 last = TuyaConnectionError(f"{self.device_id} is unreachable")
                 continue
             try:
+                # Many meters answer DP_QUERY with an empty ack and only report
+                # real values on their own schedule - nudge them to re-report.
+                if self.dp_ids:
+                    await self._device.refresh_dps(self.dp_ids)
                 fresh = await self._device.status()
             except TuyaConnectionError as err:
                 self._device.mark_dead()  # force a reconnect on the retry / next cycle
@@ -138,7 +143,11 @@ class TuyaLanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 last = err
                 continue
             self.available = True
-            self.dps.update(fresh)
+            if fresh:
+                self.dps.update(fresh)
+            _LOGGER.debug(
+                "%s: poll got %d DP(s)%s", self.device_id, len(fresh), "" if fresh else " (empty)"
+            )
             return dict(self.dps)
         self.available = False
         raise UpdateFailed(str(last))

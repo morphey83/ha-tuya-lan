@@ -1,0 +1,9 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <title>Tuya-LAN</title>
+  <g fill="none" stroke="#0fb6c4" stroke-width="22" stroke-linecap="round">
+    <path d="M32 108 A 118 118 0 0 1 224 108"/>
+    <path d="M64 130 A 76 76 0 0 1 192 130"/>
+  </g>
+  <circle cx="128" cy="158" r="24" fill="#0fb6c4"/>
+  <path d="M112 156 L144 156 L156 206 L100 206 Z" fill="#0fb6c4"/>
+</svg>
