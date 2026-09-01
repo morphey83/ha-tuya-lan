@@ -209,8 +209,11 @@ class TuyaDevice:
         result = await self._request(M.CONTROL, dps=dps)
         return _extract_dps(result)
 
-    async def heartbeat(self) -> None:
-        await self._request(M.HEART_BEAT, expect_response=True)
+    async def heartbeat(self, *, wait: bool = False) -> None:
+        # Fire-and-forget by default: the point is just to keep the socket warm.
+        # A dead pipe still surfaces here (write/drain raises); a device that
+        # simply does not ACK heartbeats must not trigger a reconnect loop.
+        await self._request(M.HEART_BEAT, expect_response=wait)
 
     # -- request / response --------------------------------------------------
     async def _request(
