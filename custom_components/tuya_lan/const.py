@@ -26,7 +26,7 @@ PROFILE_DETECT: Final = "__detect__"
 PROFILE_RAW: Final = "__raw__"
 
 DEFAULT_PORT: Final = 6668
-DEFAULT_POLL_INTERVAL: Final = 30  # seconds; local_push devices still get a heartbeat poll
+DEFAULT_POLL_INTERVAL: Final = 15  # seconds; lower it per-device in options for meters
 RECONNECT_INTERVAL: Final = 15  # seconds between reconnect attempts
 
 # Supported protocol versions, newest first (used for auto-probing).

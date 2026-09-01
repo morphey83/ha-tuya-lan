@@ -248,7 +248,7 @@ class TuyaLanOptionsFlow(OptionsFlow):
                     CONF_POLL_INTERVAL,
                     default=current.get(CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL),
                 ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0, max=3600, step=5, unit_of_measurement="s")
+                    selector.NumberSelectorConfig(min=0, max=3600, step=1, unit_of_measurement="s")
                 ),
                 vol.Optional(CONF_HOST, default=current.get(CONF_HOST, "")): str,
             }

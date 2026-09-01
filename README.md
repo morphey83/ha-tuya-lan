@@ -38,6 +38,9 @@ Ways to get it:
 
 See [`docs/getting-keys.md`](docs/getting-keys.md) for step‑by‑step instructions.
 
+For turning an energy meter's kWh into a day/night bill, see
+[`docs/tariffs.md`](docs/tariffs.md).
+
 ## Install
 
 ### HACS (custom repository)
